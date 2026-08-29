@@ -4,19 +4,30 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--paper-dim);
+  /* Brand-colored subtle animated gradient background */
+  background-color: var(--paper-dim);
+  background-image: 
+    radial-gradient(circle at 15% 50%, rgba(122, 31, 51, 0.05), transparent 35%),
+    radial-gradient(circle at 85% 30%, rgba(193, 154, 91, 0.06), transparent 35%);
   padding: 32px 20px;
   font-family: var(--sans);
+  position: relative;
+  overflow: hidden;
 }
 
 .auth-card {
   width: 100%;
   max-width: 440px;
-  background: var(--paper);
-  border: 1px solid var(--paper-line);
-  border-radius: var(--radius);
-  box-shadow: 0 30px 60px -30px rgba(11, 29, 58, 0.18);
-  padding: 48px 36px 40px;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(32px);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  border-radius: 24px;
+  box-shadow: 
+    0 4px 24px rgba(18, 23, 43, 0.02),
+    0 24px 64px rgba(18, 23, 43, 0.06);
+  padding: 48px 40px 40px;
+  position: relative;
+  z-index: 2;
 }
 
 @media (max-width: 500px) {
@@ -88,16 +99,17 @@
 .auth-field input {
   font-family: var(--sans);
   font-size: 15px;
-  padding: 11px 12px;
-  border: 1px solid var(--paper-line);
-  background: var(--paper);
-  border-radius: var(--radius);
+  padding: 12px 14px;
+  border: 1px solid rgba(18, 23, 43, 0.1);
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 12px;
   color: var(--text-ink);
-  transition: border-color 0.15s ease;
+  transition: all 0.2s ease;
 }
 
 .auth-field input:focus {
   border-color: var(--wax);
+  box-shadow: 0 0 0 3px rgba(122, 31, 51, 0.1);
   outline: none;
 }
 
