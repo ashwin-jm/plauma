@@ -4,6 +4,33 @@ import './AuthPage.css'
 
 type Mode = 'login' | 'signup'
 
+// Strict whitelist-based email format check.
+// Only allows characters that are valid in a real email address, so
+// anything used for SQL injection or XSS payloads (', ", ;, <, >, --, etc.)
+// is rejected by the pattern itself rather than by blacklisting.
+const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*\.[a-zA-Z]{2,}$/
+const MAX_EMAIL_LENGTH = 254
+
+function validateEmail(raw: string): { valid: boolean; message?: string } {
+  const value = raw.trim()
+
+  if (!value) {
+    return { valid: false, message: 'Email is required.' }
+  }
+  if (value.length > MAX_EMAIL_LENGTH) {
+    return { valid: false, message: 'Email is too long.' }
+  }
+  if (!EMAIL_REGEX.test(value)) {
+    return { valid: false, message: 'Please enter a valid email address.' }
+  }
+  // Belt-and-braces: explicitly reject characters that have no
+  // legitimate place in an email but are common injection markers.
+  if (/['";`\\<>]|--|\/\*|\*\//.test(value)) {
+    return { valid: false, message: 'Email contains invalid characters.' }
+  }
+  return { valid: true }
+}
+
 export default function AuthPage() {
   const [mode, setMode] = useState<Mode>('login')
   const [loading, setLoading] = useState(false)
@@ -33,11 +60,18 @@ export default function AuthPage() {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
     setError(null)
+
+    const sanitizedEmail = email.trim().toLowerCase()
+
+    const emailCheck = validateEmail(sanitizedEmail)
+    if (!emailCheck.valid) {
+      setError(emailCheck.message ?? 'Please enter a valid email address.')
+      return
+    }
+
     setLoading(true)
 
     try {
-      const sanitizedEmail = email.trim().toLowerCase()
-
       if (mode === 'login') {
         const { error: signInError } = await supabase.auth.signInWithPassword({
           email: sanitizedEmail,
@@ -52,8 +86,8 @@ export default function AuthPage() {
           password,
           options: {
             data: {
-              company_name: companyName,
-              phone_number: phoneNumber,
+              company_name: companyName.trim(),
+              phone_number: phoneNumber.trim(),
             },
           },
         })
@@ -63,7 +97,7 @@ export default function AuthPage() {
     } catch (err: unknown) {
       let message =
         err instanceof Error ? err.message : 'Something went wrong. Please try again.'
-      
+
       // Friendly error mapping
       if (message.includes('User already registered')) {
         message = 'An account with this email already exists.'
@@ -152,6 +186,7 @@ export default function AuthPage() {
               type="email"
               placeholder="you@company.com"
               required
+              maxLength={MAX_EMAIL_LENGTH}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />

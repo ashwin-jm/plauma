@@ -48,6 +48,7 @@ export default function ProblemForm() {
     setErrorMessage('')
 
     const { error } = await supabase.from('support_requests').insert({
+      user_id: user?.id,
       company_name: companyName,
       email,
       problem_description: problemDescription,
